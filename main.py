@@ -24,9 +24,9 @@ except ImportError:
 # ================= CONFIGURACIÓN SEGURA =================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-PORT = int(os.getenv("PORT", 10000))
+PORT = int(os.environ.get("PORT", 10000))
 
-# Modelos gratuitos y potentes en OpenRouter
+# Modelos elegidos para máxima velocidad y calidad
 MODELOS_FALLBACK = [
     "nvidia/nemotron-3.5-lightning:free",
     "nvidia/nemotron-3-super-120b-a12b:free",
@@ -64,9 +64,10 @@ async def traducir_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not texto_usuario:
         return
 
-    msg_espera = await update.message.reply_text("⏳ Traduciendo...")
+    # ⚡ OPTIMIZACIÓN DE VELOCIDAD 1: 
+    # Muestra "Escribiendo..." en Telegram en vez de enviar un mensaje de texto previo.
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action='typing')
 
-    # Instrucciones actualizadas para traducción bidireccional automática
     prompt_sistema = (
         "Eres un traductor bilingüe nativo experto (Inglés y Español). "
         "Tu único trabajo es detectar el idioma del texto del usuario y traducirlo al otro idioma: "
@@ -90,10 +91,12 @@ async def traducir_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         traduccion = response.choices[0].message.content.strip()
 
-        await msg_espera.edit_text(traduccion)
+        # ⚡ OPTIMIZACIÓN DE VELOCIDAD 2: 
+        # Envía la respuesta final directamente (ahorra los segundos de editar el mensaje de espera).
+        await update.message.reply_text(traduccion)
 
     except Exception as e:
-        await msg_espera.edit_text(f"❌ Error al traducir: {str(e)}")
+        await update.message.reply_text(f"❌ Error al traducir: {str(e)}")
 
 def main():
     threading.Thread(target=run_web, daemon=True).start()
@@ -103,7 +106,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), traducir_texto))
 
-    print("🤖 Bot Traductor Bidireccional activo y esperando mensajes...")
+    print("🤖 Bot Traductor Bidireccional optimizado activo...")
     app.run_polling()
 
 if __name__ == "__main__":
