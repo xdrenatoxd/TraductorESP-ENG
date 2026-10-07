@@ -28,8 +28,8 @@ PORT = int(os.getenv("PORT", 10000))
 
 # Modelos gratuitos y potentes en OpenRouter
 MODELOS_FALLBACK = [
-    "google/gemma-2-9b-it:free",
-    "qwen/qwen-2.5-72b-instruct:free",
+    "nvidia/nemotron-3.5-lightning:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
     "meta-llama/llama-3-8b-instruct:free"
 ]
 # =======================================================
