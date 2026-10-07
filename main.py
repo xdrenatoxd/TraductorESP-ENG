@@ -65,7 +65,7 @@ async def traducir_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # ⚡ OPTIMIZACIÓN DE VELOCIDAD 1: 
-    # Muestra "Escribiendo..." en Telegram en vez de enviar un mensaje de texto previo.
+    # Muestra "Escribiendo..." en Telegram
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action='typing')
 
     prompt_sistema = (
@@ -86,14 +86,21 @@ async def traducir_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 {"role": "user", "content": texto_usuario},
             ],
             temperature=0.3,
-            max_tokens=1500,
+            max_tokens=2500,
         )
 
         traduccion = response.choices[0].message.content.strip()
 
-        # ⚡ OPTIMIZACIÓN DE VELOCIDAD 2: 
-        # Envía la respuesta final directamente (ahorra los segundos de editar el mensaje de espera).
-        await update.message.reply_text(traduccion)
+        # ⚡ NUEVO: Lógica para dividir mensajes muy largos (Límite de Telegram: 4096)
+        MAX_LETRAS = 4000
+        
+        if len(traduccion) > MAX_LETRAS:
+            # Pica el texto en pedazos de 4000 letras y los envía uno por uno
+            for i in range(0, len(traduccion), MAX_LETRAS):
+                await update.message.reply_text(traduccion[i:i+MAX_LETRAS])
+        else:
+            # Si es un texto normal, lo envía de una sola vez
+            await update.message.reply_text(traduccion)
 
     except Exception as e:
         await update.message.reply_text(f"❌ Error al traducir: {str(e)}")
