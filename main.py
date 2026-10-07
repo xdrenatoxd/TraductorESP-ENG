@@ -29,6 +29,9 @@ PORT = int(os.environ.get("PORT", 10000))
 # Modelos elegidos para máxima velocidad y calidad
 MODELOS_FALLBACK = [
     "nvidia/nemotron-3.5-lightning:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "meta-llama/llama-3-8b-instruct:free"
+    
 ]
 # =======================================================
 
